@@ -1,4 +1,3 @@
-#include <vector>
 #include <tuple>
 #include <fstream>
 #include <sstream>
@@ -10,28 +9,19 @@
 #include "data_loader.h"
 #include "math.h"
 
-std::tuple<int, int, int> obj_data_loader::face_index_split(const std::string& s)
+std::tuple<int, int, int> obj_data_loader::face_index_split(std::string s)
 {
-	auto start = 0U;
-	auto end = s.find("/");
+	tokenizer token = tokenizer(s, "/", false);
+	
+	auto vertex = token.next();
 
-	if (end == std::string::npos)
-		return  std::tuple<int, int, int>(std::stoi(s), 0, 0);
+	auto texture = token.next();
+	if (texture.empty()) texture = "0";
 
-	auto vertex = s.substr(start, end - start);
+	auto normal = token.next();
+	if (normal.empty()) normal = "0";
 
-	start = end + 1;
-	end = s.find("/", start);
-
-	if (end == std::string::npos)
-		return  std::tuple<int, int, int>(std::stoi(vertex), std::stoi(s.substr(start)), 0);
-
-	auto texture = s.substr(start, end - start);
-	auto normal = s.substr(end + 1);
-
-	return std::tuple<int, int, int>(std::stoi(vertex),
-		(texture.length() == 0) ? 0 : std::stoi(texture),
-		std::stoi(normal));
+	return std::make_tuple(std::stoi(vertex), std::stoi(texture), std::stoi(normal));
 }
 
 obj_data_loader::obj_data_loader(const char* fname) : _fname(fname)
@@ -41,11 +31,9 @@ mesh* obj_data_loader::load()
 {
 	std::ifstream file(_fname);
 
-	texture_data* vt = nullptr;
-	normal_data* vn = nullptr;
-	vertex_data* vv  = new vertex_data(nullptr);
-	
-	std::vector<std::string> line_tokens;
+	texture_data* texCoords = nullptr;
+	normal_data* normals = nullptr;
+	vertex_data* vertices  = new vertex_data(nullptr);
 
 	for (std::string line; std::getline(file, line); )
 	{
@@ -54,55 +42,50 @@ mesh* obj_data_loader::load()
 		if (line[0] == '#') // comment
 			continue;
 
-		std::istringstream input(line);
-		line_tokens.clear();
+		tokenizer tokens = tokenizer(line, " ");
+		std::string line_start = tokens.next();
 
-		std::copy(std::istream_iterator<std::string>(input),
-			std::istream_iterator<std::string>(),
-			//std::ostream_iterator<std::string>(std::cout, " : "));
-			std::back_inserter(line_tokens));
-
-		if (line_tokens[0] == line_start[Vertex]) // vertices 
+		if (line_start == line_data[Vertex]) // vertices 
 		{
 			vec3D v = { 0,0,0,1 };
-			v.x = std::stod(line_tokens[1]);
-			v.y = std::stod(line_tokens[2]);
-			v.z = std::stod(line_tokens[3]);
-
-			vv->add_data(v);
+			v.x = std::stod(tokens.next());
+			v.y = std::stod(tokens.next());
+			v.z = std::stod(tokens.next());
+			printf("%f, %f, %f", v.x, v.y, v.z);
+			vertices->add_data(v);
 		}
-		else if (line_tokens[0] == line_start[Normal]) // normals 
+		else if (line_start == line_data[Normal]) // normals 
 		{
-			if (!vn) vn = new normal_data(nullptr);
+			if (!normals) normals = new normal_data(nullptr);
 
 			vec3D n = { 0,0,0,1 };
-			n.x = std::stod(line_tokens[1]);
-			n.y = std::stod(line_tokens[2]);
-			n.z = std::stod(line_tokens[3]);
+			n.x = std::stod(tokens.next());
+			n.y = std::stod(tokens.next());
+			n.z = std::stod(tokens.next());
 
-			vn->add_data(n);
+			normals->add_data(n);
 		}
-		else if (line_tokens[0] == line_start[Texture]) // uvmaps
+		else if (line_start == line_data[Texture]) // uvmaps
 		{
-			if (!vt) vt = new texture_data(nullptr);
+			if (!texCoords) texCoords = new texture_data(nullptr);
 
 			tex2D t = { 0,0,1 };
-			t.u = std::stod(line_tokens[1]);
-			t.v = std::stod(line_tokens[2]);
+			t.u = std::stod(tokens.next());
+			t.v = std::stod(tokens.next());
 			
-			vt->add_data(t);
+			texCoords->add_data(t);
 		}
-		else if (line_tokens[0] == line_start[Face]) // faces
+		else if (line_start == line_data[Face]) // faces
 		{
-			auto index1 = face_index_split(line_tokens[1]);
-			auto index2 = face_index_split(line_tokens[2]);
-			auto index3 = face_index_split(line_tokens[3]);
+			auto index1 = face_index_split(tokens.next());
+			auto index2 = face_index_split(tokens.next());
+			auto index3 = face_index_split(tokens.next());
 
 			int a = std::get<0>(index1) - 1;
 			int b = std::get<0>(index2) - 1;
 			int c = std::get<0>(index3) - 1;
 			
-			vv->add_triangle(a, b, c);
+			vertices->add_triangle(a, b, c);
 
 			if (std::get<1>(index3) != 0)
 			{
@@ -110,7 +93,7 @@ mesh* obj_data_loader::load()
 				int b = std::get<1>(index2) - 1;
 				int c = std::get<1>(index3) - 1;
 
-				vt->add_triangle(a, b, c);
+				texCoords->add_triangle(a, b, c);
 			}
 			if (std::get<2>(index3) != 0)
 			{
@@ -118,21 +101,21 @@ mesh* obj_data_loader::load()
 				int b = std::get<2>(index2) - 1;
 				int c = std::get<2>(index3) - 1;
 
-				vn->add_triangle(a, b, c);
+				normals->add_triangle(a, b, c);
 			}
 
 			// not sure what kind of order should be here
 			// triangle-fan cycle seems to work
-			for (int i = 4; i < line_tokens.size(); ++i)
+			for (int i = 4; tokens.has_more(); ++i)
 			{
 				index2 = index3;
-				index3 = face_index_split(line_tokens[i]);
+				index3 = face_index_split(tokens.next());
 				
 				int a = std::get<0>(index1) - 1;
 				int b = std::get<0>(index2) - 1;
 				int c = std::get<0>(index3) - 1;
 
-				vv->add_triangle(a, b, c);
+				vertices->add_triangle(a, b, c);
 
 				if (std::get<1>(index3) != 0)
 				{
@@ -140,7 +123,7 @@ mesh* obj_data_loader::load()
 					int b = std::get<1>(index2) - 1;
 					int c = std::get<1>(index3) - 1;
 
-					vt->add_triangle(a, b, c);
+					texCoords->add_triangle(a, b, c);
 				}
 				if (std::get<2>(index3) != 0)
 				{
@@ -148,13 +131,13 @@ mesh* obj_data_loader::load()
 					int b = std::get<2>(index2) - 1;
 					int c = std::get<2>(index3) - 1;
 
-					vn->add_triangle(a, b, c);
+					normals->add_triangle(a, b, c);
 				}
 			}
 		}
 	}
 
-	return new mesh(vv, vn, vt);
+	return new mesh(vertices, normals, texCoords);
 }
 
 
@@ -192,4 +175,32 @@ image* image_loader::load()
 void image_loader::dispose(image * image)
 {
 	stbi_image_free(image->get_data());
+}
+
+obj_data_loader::tokenizer::tokenizer(std::string& source, std::string delim, bool skip_empty_tokens) :
+	_source(source)
+{
+	_delimeter = delim;
+	_skip_empty = skip_empty_tokens;
+}
+
+std::string obj_data_loader::tokenizer::next()
+{
+	auto pos = _source.find(_delimeter);
+	if (pos == std::string::npos) return _source;
+
+	while (pos == 0 && _skip_empty)
+	{
+		_source.erase(0, pos + _delimeter.length());
+		pos = _source.find(_delimeter);
+	}
+
+	auto _next = _source.substr(0, pos);
+	_source.erase(0, pos + _delimeter.length());
+	return _next;
+}
+
+bool obj_data_loader::tokenizer::has_more()
+{
+	return !_source.empty();
 }
