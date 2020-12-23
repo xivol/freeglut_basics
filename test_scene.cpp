@@ -228,16 +228,8 @@ void mesh_scene::keyboard(unsigned char key, int x, int y)
 void mesh_scene::init(viewport* view, renderer* renderer)
 {
 	scene::init(view, renderer);
-
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_NORMALIZE);
-	glEnable(GL_COLOR_MATERIAL);
-	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color::BLACK);
-	glEnable(GL_TEXTURE_2D);
-
-	_camera = new camera(0, 0, 100, 0, 0, 0, 0, 1, 0);
+	
+	_camera = new camera(0, 10, 100, 0, 0, 0, 0, 1, 0);
 
 	auto obj = new shape(
 		obj_data_loader("C:\\Users\\aurgt\\source\\repos\\freeglut_basics\\data\\12140_Skull_v3_L2.obj").load(),
@@ -247,6 +239,7 @@ void mesh_scene::init(viewport* view, renderer* renderer)
 	obj->set_scale(2, 2, 2);
 	_objects.push_back(obj);
 
+	renderer->setup_light_global_ambient(&color::BLACK);
 	_lights.push_back(new point_light(&color::WHITE, 0, 0, 100));
 }
 

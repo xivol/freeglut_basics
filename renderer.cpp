@@ -25,6 +25,15 @@ void renderer::special(int key, int x, int y)
     }
 }
 
+void opengl_renderer::setup_global_defaults() const
+{
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_NORMALIZE);
+	glEnable(GL_COLOR_MATERIAL);
+}
+
 void opengl_renderer::setup_background_color(color* c) const
 {
     glClearColor(c->get_value().r, c->get_value().g, c->get_value().b, c->get_value().a);
@@ -182,6 +191,11 @@ void opengl_renderer::setup_light(GLuint index, phong* ph) const
     glLightfv(GL_LIGHT0 + index, GL_AMBIENT, ph->ambient());
     glLightfv(GL_LIGHT0 + index, GL_DIFFUSE, ph->diffuse());
     glLightfv(GL_LIGHT0 + index, GL_SPECULAR, ph->specular());
+}
+
+void opengl_renderer::setup_light_global_ambient(color * c) const
+{
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, *c);
 }
 
 GLuint* opengl_renderer::register_texture(image * img) const

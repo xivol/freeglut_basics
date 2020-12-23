@@ -42,6 +42,7 @@ public:
 
     virtual void special(int key, int x, int y);
     
+	virtual void setup_global_defaults() const = 0;
     virtual void setup_background_color(color* c) const = 0;
 
 	virtual void setup_viewport(viewport* viewport) const = 0;
@@ -65,6 +66,8 @@ public:
     virtual void setup_light(GLuint index, spotlight_light* l) const = 0;
     virtual void setup_light(GLuint index, color* c) const = 0;
     virtual void setup_light(GLuint index, phong* ph) const = 0;
+	
+	virtual void setup_light_global_ambient(color* c) const = 0;
 
     virtual void setup_material(phong* ph) const = 0;
     //virtual void setup_material_shader() const = 0;
@@ -99,6 +102,7 @@ public:
 class opengl_renderer : public renderer
 {
 public:
+	virtual void setup_global_defaults() const;
     virtual void setup_background_color(color* c) const;
 
     virtual void setup_viewport(viewport* viewport) const;
@@ -133,6 +137,7 @@ public:
     virtual void setup_light(GLuint index, spotlight_light* l) const;
     virtual void setup_light(GLuint index, color* c) const;
     virtual void setup_light(GLuint index, phong* ph) const;
+	virtual void setup_light_global_ambient(color* c) const;
 
 	virtual GLuint* register_texture(image* img) const;
 	

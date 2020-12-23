@@ -67,6 +67,7 @@ void glut::Start(const char* title, GLint left, GLint top, scene* scene, rendere
 		printf("Failed to initialize GLEW: %s", glewGetErrorString(err));
 	}
 
+	render->setup_global_defaults();
     scene->init(projection, render);
 
     glutIdleFunc(glut::Idle);
