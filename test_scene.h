@@ -21,7 +21,6 @@ public:
 
 class mesh_scene : public scene, public mouse_handler
 {
-	virtual void special(int key, int x, int y);
 	virtual void motion(int x, int y, bool is_active);
 	virtual void keyboard(unsigned char key, int x, int y);
 	virtual void init(viewport* view, renderer* renderer);
