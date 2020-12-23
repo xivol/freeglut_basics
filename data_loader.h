@@ -12,6 +12,7 @@ class obj_data_loader : public data_loader<mesh>
 	enum data_types { Object, Vertex, Face, Normal, Texture };
 	const std::string line_data[5] = { "o", "v", "f", "vn", "vt" };
 
+	/// TODO: Replace string with char* tokens to speed up obj loading
 	class tokenizer {
 		std::string _delimeter;
 		std::string& _source;
@@ -21,7 +22,6 @@ class obj_data_loader : public data_loader<mesh>
 		std::string next();
 		bool has_more();
 	};
-
 
 	std::string _fname;
 
