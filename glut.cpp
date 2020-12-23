@@ -1,7 +1,9 @@
+﻿#include "GL/glew.h"
 #include "glut.h"
 #include "scene.h"
 
 glut* glut::Instance = nullptr;
+glut::global_input glut::global_input::Default = global_input();
 
 void glut::display()
 {
@@ -13,6 +15,7 @@ glut::glut(int* argcp, char** argv)
 {
     glutInit(argcp, argv);
     _input = new input_manager(this);
+	_input->add_handler((input_handler*)&global_input::Default);
 }
 
 void glut::input_handler_did_finish(bool update_graphics)
@@ -52,6 +55,17 @@ void glut::Start(const char* title, GLint left, GLint top, scene* scene, rendere
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
 
     glutCreateWindow(title);
+
+	printf("%s %s\n", glGetString(GL_RENDERER), glGetString(GL_VENDOR));
+	printf("OpenGL v%s\n", glGetString(GL_VERSION));
+	printf("GLSL v%s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+	
+	//glewExperimental = GL_TRUE;
+	auto err = glewInit();
+	if (GLEW_OK != err)
+	{
+		printf("Failed to initialize GLEW: %s", glewGetErrorString(err));
+	}
 
     scene->init(projection, render);
 

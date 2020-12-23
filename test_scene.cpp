@@ -2,6 +2,7 @@
 #include "camera.h"
 #include "mesh.h"
 #include "data_loader.h"
+#include "texture.h"
 #include <algorithm>
 
 
@@ -37,7 +38,7 @@ void test_scene::init(viewport* view, renderer* renderer)
 		double x = 2 * radius * (i + 0.5 - count * 0.5);
 		double y = 2 * radius * (j + 0.5 - count * 0.5);
 		
-		geometry* g;
+		geometry* g = nullptr;
 		switch ((j * count + i)%10) {
 		case 0:
 			g = sphere::Default;
@@ -237,18 +238,19 @@ void mesh_scene::init(viewport* view, renderer* renderer)
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color::BLACK);
+	glEnable(GL_TEXTURE_2D);
 
 	_camera = new camera(0, 0, 100, 0, 0, 0, 0, 1, 0);
 
 	auto obj = new shape(
-		obj_data_loader("C:\\Users\\iloshkaryov\\source\\repos\\freeglut_basics\\Skull.obj").load(),
-		new substance(&color::CYAN),
+		obj_data_loader("C:\\Users\\aurgt\\source\\repos\\freeglut_basics\\data\\12140_Skull_v3_L2.obj").load(),
+		new textured_material(image_loader("C:\\Users\\aurgt\\source\\repos\\freeglut_basics\\data\\Skull.jpg").load(),
+			new phong(color::WHITE*0.1, color::YELLOW, color::WHITE, color::BLACK, 128)),
 		0, 0, -10);
 	obj->set_scale(2, 2, 2);
 	_objects.push_back(obj);
 
-	_lights.push_back(new point_light(&color::YELLOW, 0, 0, 100));
-	_lights.push_back(new directional_light(&color::MAGENTA, 0, 0, 40, 0, 0, -1));
+	_lights.push_back(new point_light(&color::WHITE, 0, 0, 100));
 }
 
 mesh_scene::mesh_scene(color background) : scene(background)

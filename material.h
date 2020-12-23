@@ -51,6 +51,7 @@ protected:
 	GLfloat _shininess = 1;
 public:
 	phong(const color& color);
+	phong(const color& ambient, const color& diffuse, const color& specular, const color& emission, GLfloat shininess);
 
 	virtual void setup(renderer* renderer);
 	virtual void setup(GLuint index, renderer* renderer);
@@ -75,10 +76,10 @@ public:
 	void set_shininess(GLfloat shininess);
 };
 
-class substance : public wrapper<material>, public render_index_param, public render_param
+class substance : public decorator<material>, public render_index_param, public render_param
 {
 public: 
-	inline substance(material* base_mat) : wrapper(base_mat) {}
+	inline substance(material* base_mat) : decorator(base_mat) {}
 	inline virtual void setup(renderer* renderer) { if (_base) _base->setup(renderer); }
 	inline virtual void setup(GLuint index, renderer* renderer) { if (_base) _base->setup(index, renderer); }
 };

@@ -1,5 +1,3 @@
-#include "data_loader.h"
-#include "math.h"
 #include <vector>
 #include <tuple>
 #include <fstream>
@@ -7,6 +5,10 @@
 #include <string>
 #include <algorithm>
 #include <iterator>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#include "data_loader.h"
+#include "math.h"
 
 std::tuple<int, int, int> obj_data_loader::face_index_split(const std::string& s)
 {
@@ -39,16 +41,9 @@ mesh* obj_data_loader::load()
 {
 	std::ifstream file(_fname);
 
-	//texture_data* vt = new texture_data(nullptr);
-	//normal_data* vn  = new normal_data(vt);
-	//vertex_data* vv  = new vertex_data(vn);
-
-	std::vector<vec3D> vertices;
-	std::vector<vec3D> normals;
-	std::vector<tex2D> uv;
-	std::vector<GLint> indices;
-	std::vector<GLint> norm_indices;
-	std::vector<GLint> uvmap_indices;
+	texture_data* vt = nullptr;
+	normal_data* vn = nullptr;
+	vertex_data* vv  = new vertex_data(nullptr);
 	
 	std::vector<std::string> line_tokens;
 
@@ -74,27 +69,28 @@ mesh* obj_data_loader::load()
 			v.y = std::stod(line_tokens[2]);
 			v.z = std::stod(line_tokens[3]);
 
-			//vv->add_data(v);
-			vertices.push_back(v);
+			vv->add_data(v);
 		}
 		else if (line_tokens[0] == line_start[Normal]) // normals 
 		{
+			if (!vn) vn = new normal_data(nullptr);
+
 			vec3D n = { 0,0,0,1 };
 			n.x = std::stod(line_tokens[1]);
 			n.y = std::stod(line_tokens[2]);
 			n.z = std::stod(line_tokens[3]);
 
-			//vn->add_data(n);
-			normals.push_back(n);
+			vn->add_data(n);
 		}
 		else if (line_tokens[0] == line_start[Texture]) // uvmaps
 		{
+			if (!vt) vt = new texture_data(nullptr);
+
 			tex2D t = { 0,0,1 };
 			t.u = std::stod(line_tokens[1]);
 			t.v = std::stod(line_tokens[2]);
 			
-			//vt->add_data(t);
-			uv.push_back(t);
+			vt->add_data(t);
 		}
 		else if (line_tokens[0] == line_start[Face]) // faces
 		{
@@ -102,26 +98,27 @@ mesh* obj_data_loader::load()
 			auto index2 = face_index_split(line_tokens[2]);
 			auto index3 = face_index_split(line_tokens[3]);
 
-			indices.push_back(std::get<0>(index1) - 1);
-			indices.push_back(std::get<0>(index2) - 1);
-			indices.push_back(std::get<0>(index3) - 1);
+			int a = std::get<0>(index1) - 1;
+			int b = std::get<0>(index2) - 1;
+			int c = std::get<0>(index3) - 1;
 			
-			/*vv->add_triangle(
-				std::get<0>(index1) - 1,
-				std::get<0>(index2) - 1,
-				std::get<0>(index3) - 1);*/
+			vv->add_triangle(a, b, c);
 
 			if (std::get<1>(index3) != 0)
 			{
-				uvmap_indices.push_back(std::get<1>(index1) - 1);
-				uvmap_indices.push_back(std::get<1>(index2) - 1);
-				uvmap_indices.push_back(std::get<1>(index3) - 1);
+				int a = std::get<1>(index1) - 1;
+				int b = std::get<1>(index2) - 1;
+				int c = std::get<1>(index3) - 1;
+
+				vt->add_triangle(a, b, c);
 			}
 			if (std::get<2>(index3) != 0)
 			{
-				norm_indices.push_back(std::get<2>(index1) - 1);
-				norm_indices.push_back(std::get<2>(index2) - 1);
-				norm_indices.push_back(std::get<2>(index3) - 1);
+				int a = std::get<2>(index1) - 1;
+				int b = std::get<2>(index2) - 1;
+				int c = std::get<2>(index3) - 1;
+
+				vn->add_triangle(a, b, c);
 			}
 
 			// not sure what kind of order should be here
@@ -131,34 +128,68 @@ mesh* obj_data_loader::load()
 				index2 = index3;
 				index3 = face_index_split(line_tokens[i]);
 				
-				indices.push_back(std::get<0>(index1) - 1);
-				indices.push_back(std::get<0>(index2) - 1);
-				indices.push_back(std::get<0>(index3) - 1);
+				int a = std::get<0>(index1) - 1;
+				int b = std::get<0>(index2) - 1;
+				int c = std::get<0>(index3) - 1;
+
+				vv->add_triangle(a, b, c);
 
 				if (std::get<1>(index3) != 0)
 				{
-					uvmap_indices.push_back(std::get<1>(index1) - 1);
-					uvmap_indices.push_back(std::get<1>(index2) - 1);
-					uvmap_indices.push_back(std::get<1>(index3) - 1);
+					int a = std::get<1>(index1) - 1;
+					int b = std::get<1>(index2) - 1;
+					int c = std::get<1>(index3) - 1;
+
+					vt->add_triangle(a, b, c);
 				}
 				if (std::get<2>(index3) != 0)
 				{
-					norm_indices.push_back(std::get<2>(index1) - 1);
-					norm_indices.push_back(std::get<2>(index2) - 1);
-					norm_indices.push_back(std::get<2>(index3) - 1);
+					int a = std::get<2>(index1) - 1;
+					int b = std::get<2>(index2) - 1;
+					int c = std::get<2>(index3) - 1;
+
+					vn->add_triangle(a, b, c);
 				}
 			}
 		}
 	}
 
-	uvmap* default_uv = new uvmap(uv, uvmap_indices, nullptr);
-
-	return new mesh(vertices, indices, normals, norm_indices, default_uv);
+	return new mesh(vv, vn, vt);
 }
 
-texture* texture_loader::load()
-{
-	//data = stbi_load(filename, &width, &height, &nrChannels, 0);
 
-	return nullptr;
+
+image::image(GLubyte* data, GLsizei width, GLsizei height, GLint channels)
+{
+	_size.width = width;
+	_size.height = height;
+	_channels = channels;
+	_data = data;
+}
+
+image::~image()
+{
+	image_loader::dispose(this);
+}
+
+
+image_loader::image_loader(const char * fname) : _fname(fname)
+{}
+
+image* image_loader::load()
+{
+	GLubyte* data;
+	GLsizei width;
+	GLsizei height;
+	GLint channels;
+
+	stbi_set_flip_vertically_on_load(true);
+	data = stbi_load(_fname.c_str(), &width, &height, &channels, 0);
+
+	return new image(data, width, height, channels);
+}
+
+void image_loader::dispose(image * image)
+{
+	stbi_image_free(image->get_data());
 }

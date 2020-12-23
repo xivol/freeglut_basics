@@ -1,7 +1,12 @@
-#include "renderer.h"
+#include "GL/glew.h"
+#include "GL/freeglut.h"
 #include "glut.h"
+#include "data_loader.h"
+#include "renderer.h"
 #include "viewport.h"
 #include "camera.h"
+#include "material.h"
+#include "texture.h"
 #include "scene.h"
 
 void renderer::set_render_mode(render_mode mode)
@@ -83,6 +88,12 @@ void opengl_renderer::setup_material(phong* ph) const
     glMaterialf(GL_FRONT, GL_SHININESS, ph->shininess());
 }
 
+void opengl_renderer::setup_material(texture* tex) const
+{
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, tex->get_id());
+}
+
 void opengl_renderer::render_begin(geometry* g) const
 {
     glPolygonMode(GL_FRONT_AND_BACK, 
@@ -160,6 +171,31 @@ void opengl_renderer::setup_light(GLuint index, phong* ph) const
     glLightfv(GL_LIGHT0 + index, GL_AMBIENT, ph->ambient());
     glLightfv(GL_LIGHT0 + index, GL_DIFFUSE, ph->diffuse());
     glLightfv(GL_LIGHT0 + index, GL_SPECULAR, ph->specular());
+}
+
+GLuint* opengl_renderer::register_texture(image * img) const
+{
+	GLuint* id = new GLuint;
+	glGenTextures(1, id);
+	glBindTexture(GL_TEXTURE_2D, *id);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	//glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	auto depth = img->get_channels() == 4 ? GL_RGBA : GL_RGB;
+
+	glTexImage2D(GL_TEXTURE_2D, 0, depth, 
+		img->get_size().width, img->get_size().height, 
+		0, depth, GL_UNSIGNED_BYTE, img->get_data());
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	delete img;
+	return id;
 }
 
 void opengl_renderer::render(scene* scene)

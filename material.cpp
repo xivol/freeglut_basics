@@ -42,6 +42,15 @@ phong::phong(const color& color)
 	set_diffuse(color);
 }
 
+phong::phong(const color & ambient, const color & diffuse, const color & specular, const color & emission, GLfloat shininess)
+{
+	_ambient = ambient;
+	_diffuse = diffuse;
+	_specular = specular;
+	_shininess = shininess;
+	_emission = emission;
+}
+
 void phong::setup(renderer* renderer)
 {
 	renderer->setup_material(this);

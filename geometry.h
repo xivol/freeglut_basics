@@ -5,6 +5,7 @@
 #include "renderer.h"
 #include <vector>
 
+
 struct size {
 	GLsizei width;
 	GLsizei height;
@@ -41,12 +42,12 @@ public:
 
 template <typename TData>
 class nested_data : public triangle_data<TData>, 
-	public wrapper<render_index_param>
+	public decorator<render_index_param>
 {
 protected: 
 	virtual void setup_data(TData* data, renderer* render) = 0;
 public:
-	inline nested_data(render_index_param* base_data) : wrapper(base_data)
+	inline nested_data(render_index_param* base_data) : decorator(base_data)
 	{}
 	inline virtual void setup(GLuint index, renderer* render)
 	{

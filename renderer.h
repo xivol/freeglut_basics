@@ -4,12 +4,13 @@
 class renderer;
 
 template <typename T>
-class wrapper : public T
+class decorator : public T
 {
 protected:
     T* _base = nullptr;
 public:
-    inline wrapper(T* base) { _base = base; }
+    inline decorator(T* base) { _base = base; }
+	inline T* reset_base(T* base) { auto t = _base; _base = base;  return t; }
 };
 
 class render_param { public: virtual void setup(renderer* renderer) = 0; };
@@ -25,6 +26,7 @@ class point_light; class attenuated_light; class directional_light; class spotli
 class color; class phong;
 class geometry; class sphere; class torus; class cone; class cylinder; class utah_teapot;
 class tetrahedron; class hexahedron; class octahedron; class dodecahedron; class icosahedron;
+class image; class texture;
 class scene;
 
 enum class render_mode { Solid, Wireframe };
@@ -61,10 +63,9 @@ public:
     virtual void setup_light(GLuint index, color* c) const = 0;
     virtual void setup_light(GLuint index, phong* ph) const = 0;
 
-    //virtual void setup_material_texture(texture* tex) const = 0;
-    //virtual void setup_material(color* c) const = 0;
     virtual void setup_material(phong* ph) const = 0;
     //virtual void setup_material_shader() const = 0;
+	virtual void setup_material(texture* t) const = 0;
     
     //virtual void setup_geometry_mesh(mesh* m) const = 0;
     virtual void render_begin(geometry* g) const = 0;
@@ -73,6 +74,8 @@ public:
     virtual void setup_vertex_color(color* col) const = 0;
     virtual void setup_vertex_tex_coord(tex2D* tex) const = 0;
     virtual void render_end() const = 0;
+
+	virtual GLuint* register_texture(image* img) const = 0;
 
     virtual void render(scene* scene) = 0;
 
@@ -109,8 +112,10 @@ public:
     virtual void setup_world(extended* scl) const;
     virtual void local_world_end() const;
 
+	
     virtual void setup_material(phong* ph) const;
-    
+	virtual void setup_material(texture* tex) const;
+
     virtual void render_begin(geometry* g) const;
     virtual void setup_vertex_position(vec3D* pos) const;
     virtual void setup_vertex_normal(vec3D* nor) const;
@@ -126,7 +131,9 @@ public:
     virtual void setup_light(GLuint index, color* c) const;
     virtual void setup_light(GLuint index, phong* ph) const;
 
-    virtual void render(scene* scene);
+	virtual GLuint* register_texture(image* img) const;
+	
+	virtual void render(scene* scene);
 
     virtual void render(sphere* sphere) const;
     virtual void render(torus* torus) const;

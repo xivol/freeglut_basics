@@ -25,18 +25,14 @@ public:
 class mesh : public geometry
 {
 protected:
-	vertex_data _vertices;
-	triangle_data<vec3D> _normals;
-
-	uvmap* _uvmap = nullptr;
+	vertex_data* _vertices = nullptr;
+	normal_data* _normals = nullptr;
+	texture_data* _uvmap = nullptr;
 public:
 	mesh() {}
-	mesh(std::vector<vec3D>& vertices, std::vector<GLint>& indices);
-	mesh(std::vector<vec3D>& vertices, std::vector<GLint>& indices, std::vector<vec3D>& normals, std::vector<GLint>& norm_indices, uvmap* default_uv = nullptr);
+	virtual ~mesh();
+	mesh(vertex_data* vertices, normal_data* normals = nullptr, texture_data* uvmap = nullptr);
 	virtual void setup(renderer* renderer);
-
-	inline uvmap* get_uvmap() { return _uvmap; }
-	virtual void set_uvmap(uvmap* uvmap);
 };
 
 class plot : public mesh

@@ -119,5 +119,8 @@
     <ClInclude Include="input.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

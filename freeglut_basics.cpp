@@ -5,6 +5,7 @@
 
 int main(int argc, char** argv)
 {
+
     glut::Init(&argc, argv);
 
     if (glut::Version() < 20001) {
@@ -12,14 +13,14 @@ int main(int argc, char** argv)
         exit(1);
     }
 
-    test_scene scene = test_scene();
+    mesh_scene scene = mesh_scene();
     
     opengl_renderer render = opengl_renderer();
 
     perspective proj = perspective(60, 500, 500, 1, 1000);
 
     glut::Start("FREEGLUT", 200, 200, &scene, &render, &proj);
-    
+
     return 0;
 }
 
