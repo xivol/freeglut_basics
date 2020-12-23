@@ -1,5 +1,6 @@
 #pragma once
 #include "math.h"
+#include "input.h"
 
 class renderer;
 
@@ -31,7 +32,7 @@ class scene;
 
 enum class render_mode { Solid, Wireframe };
 
-class renderer
+class renderer : public keyboard_handler
 {
 protected:
     render_mode _mode = render_mode::Solid;
@@ -39,6 +40,8 @@ public:
     inline render_mode get_render_mode() const { return _mode; }
     virtual void set_render_mode(render_mode mode);
 
+    virtual void special(int key, int x, int y);
+    
     virtual void setup_background_color(color* c) const = 0;
 
 	virtual void setup_viewport(viewport* viewport) const = 0;

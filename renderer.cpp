@@ -14,6 +14,17 @@ void renderer::set_render_mode(render_mode mode)
 	_mode = mode;
 }
 
+void renderer::special(int key, int x, int y)
+{
+    switch (key)
+    {
+    case GLUT_KEY_F10:
+        set_render_mode(static_cast<render_mode>((static_cast<int>(_mode) + 1) % 2));
+        _input_delegate->input_handler_did_finish(true);
+        break;
+    }
+}
+
 void opengl_renderer::setup_background_color(color* c) const
 {
     glClearColor(c->get_value().r, c->get_value().g, c->get_value().b, c->get_value().a);

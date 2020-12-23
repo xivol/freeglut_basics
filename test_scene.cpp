@@ -206,9 +206,6 @@ void plot_scene::init(viewport* view, renderer* renderer)
 plot_scene::plot_scene(color background) : test_scene(background) 
 {}
 
-void mesh_scene::special(int key, int x, int y)
-{
-}
 
 void mesh_scene::motion(int x, int y, bool is_active)
 {
