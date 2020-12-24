@@ -1,7 +1,15 @@
 #pragma once
 #ifndef math_h
 #define math_h
-#include "GL/freeglut.h"
+#ifdef __APPLE__
+    #include <OpenGL/OpenGL.h>
+#endif
+
+#ifdef _WIN32
+    #include "GL/glew.h"
+    #include "GL/freeglut.h"
+#endif
+
 #include <cmath>
 
 union vec3D

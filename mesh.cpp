@@ -50,7 +50,7 @@ void plot::generate_mesh(fzxy f, double min_x, double min_y, double max_x, doubl
 	for (double x = min_x; x < max_x + step_x; x += step_x)
 		for (double y = min_y; y < max_y + step_x; y += step_y)
 		{
-			vec3D vertex = { x,y,f(x, y),1 };
+            vec3D vertex = { (GLfloat)x,(GLfloat)y,(GLfloat)f(x, y),1 };
 			_vertices->add_data(vertex);
 			vec3D normal = { 0,0,0,1 };
 			t_normals.push_back(normal);

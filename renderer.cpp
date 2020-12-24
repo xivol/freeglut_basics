@@ -1,5 +1,13 @@
-#include "GL/glew.h"
-#include "GL/freeglut.h"
+#ifdef __APPLE__
+    #include <OpenGL/OpenGL.h>
+    #include <GLUT/GLUT.h>
+#endif
+
+#ifdef _WIN32
+    #include "GL/glew.h"
+    #include "GL/freeglut.h"
+#endif
+
 #include "glut.h"
 #include "data_loader.h"
 #include "renderer.h"

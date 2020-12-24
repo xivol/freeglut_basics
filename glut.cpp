@@ -1,4 +1,3 @@
-﻿#include "GL/glew.h"
 #include "glut.h"
 #include "scene.h"
 
@@ -105,8 +104,10 @@ void glut::DrawTorus(double dInnerRadius, double dOuterRadius, GLint nSides, GLi
 
 void glut::DrawCylinder(double base, double height, GLint slices, GLint stacks, bool is_wire)
 {
+#ifdef _WIN23
     auto cylinder = (is_wire) ? glutWireCylinder : glutSolidCylinder;
     cylinder(base, height, slices, stacks);
+#endif
 }
 
 void glut::DrawCone(double base, double height, GLint slices, GLint stacks, bool is_wire)

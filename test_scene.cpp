@@ -1,9 +1,20 @@
+#ifdef __APPLE__
+    #include <OpenGL/OpenGL.h>
+    #include <GLUT/GLUT.h>
+#endif
+
+#ifdef _WIN32
+    #include "GL/glew.h"
+    #include "GL/freeglut.h"
+#endif
+
 #include "test_scene.h"
 #include "camera.h"
 #include "mesh.h"
 #include "data_loader.h"
 #include "texture.h"
 #include <algorithm>
+
 
 
 test_scene::test_scene(color background) : scene(background)

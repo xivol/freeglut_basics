@@ -52,7 +52,8 @@ public:
 	inline virtual void setup(GLuint index, renderer* render)
 	{
 		if(_base) _base->setup(index, render);
-		setup_data(&this->operator[](index), render);
+        TData t =this->operator[](index);
+		setup_data(&t, render);
 	}
 };
 

@@ -1,8 +1,16 @@
-#pragma once
 #ifndef glut_h
 #define glut_h
 
-#include "GL/freeglut.h"
+#ifdef __APPLE__
+    #include <OpenGL/OpenGL.h>
+    #include <GLUT/GLUT.h>
+#endif
+
+#ifdef _WIN32
+    #include "GL/glew.h"
+    #include "GL/freeglut.h"
+#endif
+
 #include "renderer.h"
 #include "viewport.h"
 #include "scene.h"
@@ -40,10 +48,8 @@ class glut : public input_handler_delegate
 	void input_handler_did_finish(bool update_graphics);
 	
 	/// MARK: Static	
-	/// <summary>
-	/// 
-	/// </summary>
-	static glut* Instance;
+
+    static glut* Instance;
 
 	static void Idle() { glut::Instance->_input->idle(); }
 	static void Display() { glut::Instance->display(); }
@@ -59,7 +65,7 @@ class glut : public input_handler_delegate
 
 public:
 	static void Init(int* argcp, char** argv) { Instance = new glut(argcp, argv); }
-	static int Version() { return glutGet(GLUT_VERSION); }
+	static int Version() { return  9999/*glutGet(GLUT_VERSION)*/; }
 
 	static void Start(const char* title, GLint left, GLint top, scene* scene, renderer* render, viewport* projection);
 

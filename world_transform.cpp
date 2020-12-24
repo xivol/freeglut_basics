@@ -1,4 +1,13 @@
 #include "world_transform.h"
+#ifdef __APPLE__
+    #include <OpenGL/OpenGL.h>
+    #include <GLUT/GLUT.h>
+#endif
+
+#ifdef _WIN32
+    #include "GL/glew.h"
+    #include "GL/freeglut.h"
+#endif
 
 point::point(GLfloat x, GLfloat y, GLfloat z)
 {
